@@ -2,43 +2,46 @@
 using namespace std;
 #define INF 1000000
 
+struct info {
+	int l = 0, f = 0;
+};
+
+int v1[105][105], v2[105][105];
+int dp[105][105][105][2];
+
 int main() {
 	int t;	cin >> t;
 	while (t--) {
 		int n, m, l, g;	cin >> n >> m >> l >> g;
-		vector<vector<int>> v1(n), v2(n - 1);
-		vector<vector<pair<int, int>>> dp(n);
-		for (int i = 0; i < n; i++) {
-			v1[i].resize(m - 1), dp[i].resize(m, { INF,0 });
-			for (int j = 0; j < m - 1; j++) cin >> v1[i][j];
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j < m; j++) cin >> v1[i][j];
 		}
-		for (int i = 0; i < n - 1; i++) {
-			v2[i].resize(m);
-			for (int j = 0; j < m; j++) cin >> v2[i][j];
+		for (int i = 1; i < n; i++) {
+			for (int j = 1; j <= m; j++) cin >> v2[i][j];
 		}
 
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < m; j++) {
-				if (!i) {
-					if (!j) dp[i][j].first = 0;
-					else {
-						if (dp[i][j - 1].first != INF) {
-							if (dp[i][j - 1].second + v1[i][j - 1] <= g) {
-								dp[i][j].second = dp[i][j - 1].second + v1[i][j - 1];
-								dp[i][j].first = dp[i][j - 1].first + l;
-							}
-						}
-					}
-				}
-				else {
-					if (!j) {
-						if (dp[i - 1][j].first != INF) {
-
-						}
-					}
+		memset(dp, 0x3f, sizeof(dp));
+		dp[1][1][1][0] = dp[1][1][1][1] = 0;
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= m; j++) {
+				for (int k = 1; k <= 100; k++) {
+					int f0 = v1[i][j - 1], f1 = v2[i - 1][j];
+					int e0 = min(dp[i][j - 1][k][0], dp[i][j - 1][k - 1][1]);
+					int e1 = min(dp[i - 1][j][k][1], dp[i - 1][j][k - 1][0]);
+					dp[i][j][k][0] = min(dp[i][j][k][0], f0 + e0);
+					dp[i][j][k][1] = min(dp[i][j][k][1], f1 + e1);
 				}
 			}
 		}
+
+		int ans = -1;
+		for (int i = 100; i >= 0; i--) {
+			if (dp[n][m][i][0] <= g) ans = i;
+			if (dp[n][m][i][1] <= g) ans = i;
+		}
+
+		if (ans < 0) printf("-1\n");
+		else printf("%d\n", (n + m - 2)*l + ans - 1);
 	}
 
 	return 0;
